@@ -1,0 +1,9 @@
+.character{
+  img {
+    width: 90%;
+    height: 70%; /* 任意で揃えたい高さ */
+    object-fit: contain; /* または contain */
+    display: block;
+    justify-self: center;
+  }
+}
