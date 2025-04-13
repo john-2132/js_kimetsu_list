@@ -16,42 +16,25 @@ function preloadImages(urls) {
 function renderCharacters(characters, images) {
   const gallery = document.getElementById('gallery');
 
-  let row;
+  if (!gallery) {
+    throw new Error("gallery要素が見つかりません。");
+  }
+
   characters.forEach((chara, i) => {
     const character = document.createElement('div');
-    character.classList.add('character', 'col', 'text-center', 'align-content-center');
-    if (i % 3 !== 2) {
-      character.classList.add('border-end');
-    }
+    character.classList.add('character', 'text-center', 'align-content-center');
 
     const name = document.createElement('p');
     name.textContent = chara.name;
 
     const category = document.createElement('p');
     category.textContent = chara.category;
-    category.className = 'mt-3';
-
-    if (i % 3 === 0) {
-      row = document.createElement('div');
-      row.classList.add('row', 'border');
-    }
 
     character.append(name);
     character.append(images[i]);
     character.append(category);
-    row.append(character);
-    gallery.append(row);
+    gallery.append(character);
   });
-
-  const remainder = characters.length % 3;
-  if (remainder !== 0) {
-    for (let i = 0; i < 3 - remainder; i++) {
-      const dummy = document.createElement('div');
-      dummy.classList.add('character', 'col');
-      dummy.style.visibility = 'hidden';
-      row.append(dummy);
-    }
-  }
 }
 
 function setLoading(isLoading) {
@@ -59,10 +42,19 @@ function setLoading(isLoading) {
   loader.style.display = isLoading ? 'block' : 'none';
 }
 
+let currentRequestId = 0;
+
 async function fetchAndDisplayCharacters(path) {
   const gallery = document.getElementById('gallery');
+
+  if (!gallery) {
+    throw new Error("gallery要素が見つかりません。");
+  }
+  
   gallery.innerHTML = '';
   setLoading(true);
+
+  const requestId = ++currentRequestId;
 
   try {
     const response = await fetch(path);
@@ -72,12 +64,18 @@ async function fetchAndDisplayCharacters(path) {
     const imageUrls = characters.map(c => c.image);
     const images = await preloadImages(imageUrls);
 
+    if (requestId !== currentRequestId) return;
+
     renderCharacters(characters, images);
   } catch(error) {
-    console.log(error);
-    gallery.innerHTML = '<p class="error">キャラクターの読み込みに失敗しました。</p>';
+    if (requestId === currentRequestId) {
+      gallery.innerHTML = '<p class="alert alert-danger justify-self-center w-50 g-col-3">キャラクターの読み込みに失敗しました。</p>';
+      throw new Error("キャラクターの読み込みに失敗しました。" + error.message);
+    }
   } finally {
-    setLoading(false);
+    if (requestId === currentRequestId) {
+      setLoading(false);
+    }
   }
 }
 
