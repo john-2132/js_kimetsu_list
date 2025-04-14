@@ -1,0 +1,26 @@
+.character{
+  border: 1px solid #dee2e6;
+  box-sizing: border-box;
+  img {
+    width: 90%;
+    height: 70%; /* 任意で揃えたい高さ */
+    object-fit: contain; /* または contain */
+    display: block;
+    justify-self: center;
+  }
+}
+
+.justify-self-center {
+  justify-self: center;
+}
+
+.g-col-3 {
+  grid-column: span 3;
+}
+
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin: 2px;
+}
